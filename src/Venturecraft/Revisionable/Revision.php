@@ -1,7 +1,6 @@
 <?php namespace Venturecraft\Revisionable;
 
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 
 /**
@@ -178,13 +177,13 @@ class Revision extends Eloquent
      */
     public function userResponsible()
     {
+        $user_model = app('config')->get('auth.model');
         if (class_exists($class = '\Cartalyst\Sentry\Facades\Laravel\Sentry')) {
-            return $this->belongsTo(Config::get('sentry::users')['model'], 'user_id');
+            $user_model = app('config')->get('sentry::users')['model'];
         } else if (class_exists($class = '\Cartalyst\Sentinel\Laravel\Facades\Sentinel')) {
-            return $this->belongsTo(Config::get('sentinel::users')['model'], 'user_id');
-        } else {
-            return $this->belongsTo(Config::get('auth.model'), 'user_id');
+            $user_model = app('config')->get('sentinel::users')['model'];
         }
+        return $this->belongsTo($user_model, 'user_id');
     }
 
     /*
