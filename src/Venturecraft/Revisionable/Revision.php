@@ -186,6 +186,20 @@ class Revision extends Eloquent
         return $this->belongsTo($user_model, 'user_id');
     }
 
+
+    /**
+     * Returns the object we have the history of
+     * @return Object or false
+     */
+    public function historyOf()
+    {
+        if(class_exists($class = $this->revisionable_type))
+        {
+            return $class::find($this->revisionable_id);
+        }
+        return false;
+    }
+
     /*
      * Egzamples:
     array(
