@@ -194,13 +194,25 @@ class Revision extends Eloquent
      */
     public function userResponsible()
     {
-        $user_model = app('config')->get('auth.model');
-        if (class_exists($class = '\Cartalyst\Sentry\Facades\Laravel\Sentry')) {
-            $user_model = app('config')->get('sentry::users')['model'];
-        } else if (class_exists($class = '\Cartalyst\Sentinel\Laravel\Facades\Sentinel')) {
-            $user_model = app('config')->get('sentinel::users')['model'];
+        if (empty($this->user_id)) { return false; }
+        if (class_exists($class = '\Cartalyst\Sentry\Facades\Laravel\Sentry')
+            || class_exists($class = '\Cartalyst\Sentinel\Laravel\Facades\Sentinel')
+        ) {
+            return $class::findUserById($this->user_id);
+        } else {
+            $user_model = app('config')->get('auth.model');
+
+            if (empty($user_model)) {
+                $user_model = app('config')->get('auth.providers.users.model');
+                if (empty($user_model)) {
+                    return false;
+                }
+            }
+            if (!class_exists($user_model)) {
+                return false;
+            }
+            return $user_model::find($this->user_id);
         }
-        return $this->belongsTo($user_model, 'user_id');
     }
 
     /**
